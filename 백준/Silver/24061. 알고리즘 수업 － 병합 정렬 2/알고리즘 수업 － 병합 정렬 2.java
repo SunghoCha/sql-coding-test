@@ -5,40 +5,50 @@ public class Main {
 
     private static int count = 0;
     private static int tryNum;
-    private static boolean found = false;
     private static int[] result;
+    private static boolean flag;
 
     public static void main(String[] args) throws IOException {
+
+        /*
+            입력받은 배열을 절반으로 나눠서 다시 mergeSort 하는 재귀. sort된 배열들을 다시 조립
+         */
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        StringTokenizer st = new StringTokenizer(br.readLine());
+        StringBuilder sb = new StringBuilder();
 
+        StringTokenizer st = new StringTokenizer(br.readLine());
         int size = Integer.parseInt(st.nextToken());
         tryNum = Integer.parseInt(st.nextToken());
-        int[] input = new int[size];
 
+        int[] input = new int[size];
         st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < input.length; i++) {
             input[i] = Integer.parseInt(st.nextToken());
         }
 
-        mergeSort(input, 0, size - 1);
+        int from = 0;
+        int to = input.length - 1;
+        mergeSort(input, from, to);
 
-        if (found) {
-            for (int num : result) {
-                bw.write(num + " ");
-            }
-        } else {
+        if (count < tryNum) {
             bw.write("-1");
+            bw.flush();
+            bw.close();
+        } else {
+            for (int i : result) {
+                sb.append(i).append(" ");
+            }
+            bw.write(sb.toString().trim());
+            bw.flush();
+            bw.close();
         }
-
-        bw.flush();
-        bw.close();
     }
 
     private static void mergeSort(int[] input, int from, int to) {
-        if (from < to && !found) {
+        if (from < to && !flag) {
             int middle = (from + to) / 2;
+
             mergeSort(input, from, middle);
             mergeSort(input, middle + 1, to);
             merge(input, from, middle, to);
@@ -50,50 +60,50 @@ public class Main {
         int i = from;
         int j = middle + 1;
         int t = 0;
-
         while (i <= middle && j <= to) {
             if (input[i] <= input[j]) {
                 tmp[t++] = input[i++];
             } else {
                 tmp[t++] = input[j++];
             }
-
             count++;
             if (count == tryNum) {
-                saveState(input, from, tmp, t);
+                flag = true;
+                result = input.clone();
+                for (int k = 0; k < t; k++) {
+                    result[from + k] = tmp[k];
+                }
                 return;
             }
         }
-
         while (i <= middle) {
             tmp[t++] = input[i++];
             count++;
             if (count == tryNum) {
-                saveState(input, from, tmp, t);
+                flag = true;
+                result = input.clone();
+                for (int k = 0; k < t; k++) {
+                    result[from + k] = tmp[k];
+                }
                 return;
             }
         }
-
         while (j <= to) {
             tmp[t++] = input[j++];
             count++;
             if (count == tryNum) {
-                saveState(input, from, tmp, t);
+                flag = true;
+                result = input.clone();
+                for (int k = 0; k < t; k++) {
+                    result[from + k] = tmp[k];
+                }
                 return;
             }
         }
-
-        // 결과 반영
+        // return 이후에 이 반복문이 실행되나??
         for (int k = 0; k < tmp.length; k++) {
             input[from + k] = tmp[k];
         }
     }
 
-    private static void saveState(int[] input, int from, int[] tmp, int t) {
-        found = true;
-        result = input.clone(); // 배열 전체 복사
-        for (int k = 0; k < t; k++) {
-            result[from + k] = tmp[k]; // 중간 상태 반영
-        }
-    }
 }
