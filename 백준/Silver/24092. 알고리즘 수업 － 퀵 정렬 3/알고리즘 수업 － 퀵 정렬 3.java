@@ -1,51 +1,61 @@
 
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.util.*;
 
 public class Main {
 
-    static int[] B;
-    static int flag;
-    static int idx = -1;
-    public static void main(String[] args) throws IOException{
-        // 입력 값 받기
+    private static int count = 0;
+    private static int tryNum;
+    private static int result = 0;
+    private static boolean flag = false;
+    private static int[] B;
+    private static int[] input2;
+    private static int idx = -1;
+    private static StringBuilder sb;
+
+    public static void main(String[] args) throws IOException {
+
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int N = Integer.parseInt(br.readLine());
-        int[] A = new int[N];
-        B = new int[N];
-        flag = 0;
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter((System.out)));
+        sb = new StringBuilder();
 
         StringTokenizer st = new StringTokenizer(br.readLine());
-        for(int i = 0; i < N; i++){
-            A[i] = Integer.parseInt(st.nextToken());
+        int size = Integer.parseInt(st.nextToken());
+
+        int[] A = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        B = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+
+        if (compareArray(A)) {
+            bw.write("1");
+            bw.flush();
+            bw.close();
+            return;
         }
 
-        st = new StringTokenizer(br.readLine());
-        for(int i = 0; i < N; i++){
-            B[i] = Integer.parseInt(st.nextToken());
+        qSort(A, 0, size - 1);
+
+        if (flag) {
+            bw.write("1");
+            bw.flush();
+            bw.close();
+        } else {
+            bw.write("0");
+            bw.flush();
+            bw.close();
         }
-
-        compareArray(A);
-        quickSort(A, 0, N - 1);
-
-        System.out.println(flag);
     }
 
-    public static void quickSort(int[] A, int left, int right){
-
-        if(left >= right) return;
-        if(flag == 1) return;
-
-        int pivot = partition(A, left, right);
-
-        quickSort(A, left, pivot - 1);
-        quickSort(A, pivot + 1, right);
+    private static void qSort(int[] A, int left, int right) {
+        if (left < right && !flag) {
+            int pivotIdx = partition(A, left, right);
+            qSort(A, left, pivotIdx - 1);
+            qSort(A, pivotIdx + 1, right);
+        }
     }
 
-    public static int partition(int[] A, int left, int right){
+    private static int partition(int[] A, int left, int right) {
         int lo = left;
         int hi = right;
         int pivot = A[right];
@@ -74,18 +84,17 @@ public class Main {
         A[j] = temp;
     }
 
-    public static boolean compareArray(int[] A){
+    private static boolean compareArray(int[] A) {
         if (idx < 0) idx = 0;
-        for(int i = idx; i < A.length; i++){
-            if(A[i] != B[i]){
-                idx = i - 1;
+        for (int k = idx; k < A.length; k++) {
+            if (A[k] != B[k]) {
+                idx = k - 1; // 일치하는 input의 마지막 인덱스 저장
                 return false;
             }
         }
-        flag = 1;
+        flag = true;
         return true;
     }
+
 }
-
-
 
