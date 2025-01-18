@@ -1,3 +1,5 @@
+
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,6 +9,7 @@ public class Main {
 
     static int[] B;
     static int flag;
+    static int idx = -1;
     public static void main(String[] args) throws IOException{
         // 입력 값 받기
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -72,8 +75,10 @@ public class Main {
     }
 
     public static boolean compareArray(int[] A){
-        for(int i = 0; i < A.length; i++){
+        if (idx < 0) idx = 0;
+        for(int i = idx; i < A.length; i++){
             if(A[i] != B[i]){
+                idx = i - 1;
                 return false;
             }
         }
@@ -81,3 +86,6 @@ public class Main {
         return true;
     }
 }
+
+
+
