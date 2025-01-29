@@ -1,3 +1,4 @@
+
 import java.io.*;
 import java.util.*;
 
@@ -39,6 +40,7 @@ public class Main {
 
     // ✅ 재귀 방식 (탑다운) - **메모이제이션 없이 완전 탐색**
     private static int matrixPath(int[][] m, int n) {
+        count1++;
         return matrixPathRec(m, n, n);
     }
 
@@ -46,10 +48,10 @@ public class Main {
           // ✅ 코드1 실행 횟수 증가 (모든 재귀 호출에서 증가)
 
         if (i == 0 || j == 0) {  // ✅ 경계를 벗어나면 0 반환
-            count1++;
+
             return 0;
         }
-        
+        count1++;
         return m[i][j] + Math.max(matrixPathRec(m, i - 1, j), matrixPathRec(m, i, j - 1));
     }
 
