@@ -1,5 +1,6 @@
 
 
+
 import java.io.*;
 import java.util.StringTokenizer;
 
@@ -29,47 +30,31 @@ public class Main {
             input[i] = Integer.parseInt(st.nextToken());
         }
 
+        dp[0] = input[0];
+        for (int i = 1; i < num; i++) {
+            dp[i] = dp[i - 1] + input[i];
+        }
+        
+        
         for (int i = 0; i < size; i++) {
             st = new StringTokenizer(br.readLine());
             int from = Integer.parseInt(st.nextToken()) - 1;
             int to = Integer.parseInt(st.nextToken()) - 1;
 
-            int result = dp(from, to);
+            int result = dp[to] - dp[from] + input[from];
 
             sb.append(result).append("\n");
         }
 
+        
+        
+        
 
         bw.write(sb.toString());
         bw.flush();
         bw.close();
     }
 
-    private static int calculateSum(int to) {
-        int sum = 0;
-        for (int i = 0; i <= to; i++) {
-            sum += input[i];
-        }
-        return sum;
-    }
 
-    private static int dp(int from, int to) {
-        int a = 0;
-        int b = 0;
-        if (dp[from] != 0) {
-            a = dp[from];
-        } else {
-            dp[from] = calculateSum(from);
-            a = dp[from];
-        }
-        if (dp[to] != 0) {
-            b = dp[to];
-        } else {
-            dp[to] = calculateSum(to);
-            b = dp[to];
-        }
-
-        return b - a + input[from];
-    }
 
 }
