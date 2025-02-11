@@ -5,8 +5,6 @@ import java.util.StringTokenizer;
 
 public class Main {
     private static StringBuilder sb;
-    private static long[] heights;
-    private static long maxArea;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -16,16 +14,14 @@ public class Main {
         while (true) {
             StringTokenizer st = new StringTokenizer(br.readLine());
             int n = Integer.parseInt(st.nextToken());
-
             if (n == 0) break; // 입력이 0이면 종료
 
-            heights = new long[n];
-
+            long[] heights = new long[n];
             for (int i = 0; i < n; i++) {
                 heights[i] = Long.parseLong(st.nextToken());
             }
 
-            maxArea = getMaxArea(n);
+            long maxArea = getMaxArea(n, heights);
             sb.append(maxArea).append("\n");
         }
 
@@ -34,12 +30,12 @@ public class Main {
         bw.close();
     }
 
-    private static long getMaxArea(int n) {
+    private static long getMaxArea(int n, long[] heights) {
         Deque<Integer> deque = new ArrayDeque<>();
         long maxArea = 0;
 
         for (int i = 0; i < n; i++) {
-            // 현재 높이가 이전보다 낮다면, 스택에서 pop하면서 최대 사각형을 계산
+            // 이전보다 낮은 높이가 나오면 pop하면서 최대 넓이 계산
             while (!deque.isEmpty() && heights[i] < heights[deque.peek()]) {
                 int heightIndex = deque.pop();
                 long height = heights[heightIndex];
@@ -49,7 +45,7 @@ public class Main {
             deque.push(i);
         }
 
-        // 스택에 남아있는 요소 처리
+        // 스택에 남아 있는 요소 처리
         while (!deque.isEmpty()) {
             int heightIndex = deque.pop();
             long height = heights[heightIndex];
