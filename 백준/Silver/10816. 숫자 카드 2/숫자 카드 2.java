@@ -1,9 +1,11 @@
 
 
-
 import java.io.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 
 public class Main {
 
@@ -15,28 +17,25 @@ public class Main {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter((System.out)));
         sb = new StringBuilder();
 
-        int total = Integer.parseInt(br.readLine());
-        StringTokenizer st = new StringTokenizer(br.readLine());
         Map<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < total; i++) {
-            int number = Integer.parseInt(st.nextToken());
-            map.put(number, map.getOrDefault(number , 0) + 1);
+        int N = Integer.parseInt(br.readLine());
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < N; i++) {
+            int value = Integer.parseInt(st.nextToken());
+            map.put(value, map.getOrDefault(value, 0) + 1);
         }
 
-        int size = Integer.parseInt(br.readLine());
+        int M = Integer.parseInt(br.readLine());
         st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < size; i++) {
-            Integer result = map.getOrDefault(Integer.parseInt(st.nextToken()), 0);
-            sb.append(result).append(" ");
+        for (int i = 0; i < M; i++) {
+            int target = Integer.parseInt(st.nextToken());
+            sb.append(map.getOrDefault(target, 0)).append(" ");
         }
 
-        bw.write(sb.toString().trim());
+        bw.write(sb.toString());
         bw.flush();
         bw.close();
-
     }
 
 
-
 }
-
