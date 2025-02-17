@@ -47,11 +47,7 @@ public class Main {
 
         while (!deque.isEmpty()) {
             int[] node = deque.poll();
-
-            if (isTarget(node[0], node[1])) {
-                return input[node[0]][node[1]];
-            }
-
+            
             for (int i = 0; i < 4; i++) {
                 int nx = node[0] + dx[i];
                 int ny = node[1] + dy[i];
@@ -60,6 +56,10 @@ public class Main {
                    deque.offer(new int[]{nx, ny});
                    visited[nx][ny] = true;
                    input[nx][ny] = input[node[0]][node[1]] + 1;
+
+                    if (isTarget(nx, ny)) {
+                        return input[nx][ny];
+                    }
                 }
             }
         }
