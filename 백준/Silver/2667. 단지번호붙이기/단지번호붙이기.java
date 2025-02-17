@@ -16,45 +16,57 @@ public class Main {
         sb = new StringBuilder();
 
         n = Integer.parseInt(br.readLine());
-        visited = new boolean[n][n];
         input = new int[n][n];
+        visited = new boolean[n][n];
         List<Integer> result = new ArrayList<>();
+
+        // 초기 입력
         for (int i = 0; i < n; i++) {
-            String[] split = br.readLine().split("");
+            String line = br.readLine();
             for (int j = 0; j < n; j++) {
-                input[i][j] = Integer.parseInt(split[j]);
+                input[i][j] = line.charAt(j) - '0';
             }
         }
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (input[i][j] == 1 && !visited[i][j]) {
-                    int size = dfs(i, j);
+                    int size = bfs(i,j);
                     result.add(size);
                 }
             }
         }
+
         result.sort((a1, b1) -> a1 - b1);
         sb.append(result.size()).append("\n");
         for (Integer value : result) {
             sb.append(value).append("\n");
         }
+
         bw.write(sb.toString());
         bw.flush();
     }
 
-    private static int dfs(int x, int y) {
-        int count = 1;
+    private static int bfs(int x, int y) {
+        int count = 0;
+        Deque<int[]> deque = new ArrayDeque<>();
+        deque.offer(new int[]{x, y});
         visited[x][y] = true;
+        count++;
+
         int[] dx = {1, -1, 0, 0};
         int[] dy = {0, 0, 1, -1};
 
-        for (int i = 0; i < 4; i++) {
-            int nx = x + dx[i];
-            int ny = y + dy[i];
-
-            if (isValidPosition(nx, ny) && !visited[nx][ny] && input[nx][ny] == 1) {
-                count += dfs(nx, ny);
+        while (!deque.isEmpty()) {
+            int[] node = deque.poll();
+            for (int i = 0; i < 4; i++) {
+                int nx = node[0] + dx[i];
+                int ny = node[1] + dy[i];
+                if (isValidPosition(nx, ny) && !visited[nx][ny] && input[nx][ny] == 1) {
+                    deque.offer(new int[]{nx, ny});
+                    visited[nx][ny] = true;
+                    count++;
+                }
             }
         }
 
@@ -62,6 +74,6 @@ public class Main {
     }
 
     private static boolean isValidPosition(int x, int y) {
-        return (x >= 0 && x < n && y >= 0 && y < n);
+        return x >= 0 && x < n && y >= 0 && y < n;
     }
 }
