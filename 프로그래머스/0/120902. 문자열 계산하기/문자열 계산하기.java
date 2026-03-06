@@ -1,45 +1,44 @@
 class Solution {
     public int solution(String my_string) {
-        int answer = 0;
-        char[] chars = my_string.toCharArray();
-        int length = chars.length;
-        int pre = 0;
-        boolean isPre = true;
+        /*
+            숫자 or 공백 or 연산자
+            공백은 바로 리턴
+            숫자가 한자리수가 아니라서 이걸 찾는 로직 필요. while문으로 숫자찾아서 확정
+        
+        */
+        int result = 1000000;
         char oper = ' ';
-        for (int i = 0; i < chars.length; i++) {
-            char ch = chars[i];
-            if (ch == ' ') {
-                continue; // 공백은 스킵
+        int length = my_string.length();
+        for (int i = 0; i < length; i++) {
+            if (my_string.charAt(i) == ' ') {
+                continue;
             }
             
-            if (Character.isDigit(ch)) {
+            if (!Character.isDigit(my_string.charAt(i))) {
+                oper = my_string.charAt(i);
+            }
+            
+            if (Character.isDigit(my_string.charAt(i))) {
                 int num = 0;
-                while (i < length && Character.isDigit(chars[i])) {
-                    num = (10 * num) + Character.getNumericValue(chars[i]);
+                while (i < length && Character.isDigit(my_string.charAt(i))) {
+                    num = (10 * num) + Character.getNumericValue(my_string.charAt(i));
                     i++;
                 }
-                i--; // 위에 for문에서 ++하기때문에 보정
-                
-                if (isPre) {
-                    pre = num;
-                    isPre = false;
-                    continue;
+                i--;
+                if (result == 1000000) {
+                    result = num;
+                } else {
+                    if (oper == '+') {
+                        result += num;
+                    } else {
+                        result -= num;
+                    }
                 }
-                // pre가 아닌 숫자면 계산해야함. 연산자도 있는 상태
-                int result = 0;
-                if (oper == '+') {
-                    pre = pre + num;
-                } else if (oper == '-') {
-                    pre = pre - num;
-                }
-                          
-                
-            } else if (!Character.isDigit(ch)) { // 공백은 위에서 걸러짐
-                oper = ch;
+            
             }
+            
+            
         }
-        
-        
-        return pre;
+        return result;
     }
 }
