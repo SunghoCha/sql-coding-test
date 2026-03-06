@@ -1,51 +1,36 @@
 class Solution {
     public int solution(String s) {
-        int answer = 0;
-        /*
-            첫문자열 선택 target
-            탐색하면서 첫문자열 개수:target과 다른문자열개수:other를 셈
-            여기서 현재 탐새글자에서 글자개수갱신하고 같으면 분리하고 카운트증가
-            
-            다음과정으로 반복.
-            만약 같은개수 찾지못하고 탐색종료된다면 해당 문자열을 분리하고 카운트증가
-    
-        */
         
-        boolean isStart = true;
-        char target = ' ';
-        int targetCount = 0;
-        int otherCount = 0; // 초기화해야함 마지막
-        for (char ch : s.toCharArray()) {
-            if (isStart) {
-                target = ch;
-                targetCount++;
-                isStart = false;
+        char[] chars = s.toCharArray();
+        char first = ' ';
+        boolean hasFirst = false;
+        int firstCount = 0;
+        int otherCount = 0;
+        int ans = 0;
+        for (int i = 0; i < chars.length; i++) {
+            char ch = chars[i];
+            if (!hasFirst) { // 처음인경우
+                hasFirst = true;
+                first = ch;
+                firstCount++;
                 continue;
             }
-            if (ch == target) {
-                targetCount++;
-                if (targetCount == otherCount) {
-                    isStart = true;
-                    answer++;
-                    targetCount = 0;
-                    otherCount = 0;
-                }
+            
+            if (ch == first) { // 처음 아닌경우 카운팅
+                firstCount++;
             } else {
                 otherCount++;
-                if (targetCount == otherCount) {
-                    isStart = true;
-                    answer++;
-                    targetCount = 0;
-                    otherCount = 0;
-                }
+            }
+            
+            if (otherCount == firstCount) { // 카운팅 후 비교
+                    hasFirst = false; // 같으면 처음값 초기화
+                    ans++; // 값 카운팅 증가
             }
             
         }
-        // 문자열이 남은 상태를 체크해서 answer++ 결정해야함
-        if (!isStart) {
-            answer++;
+        if (hasFirst) { // 남은값 카운팅
+            ans++;
         }
-        
-        return answer;
+        return ans;
     }
 }
