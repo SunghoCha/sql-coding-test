@@ -1,69 +1,61 @@
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
+
 class Solution {
-    public int solution(int length, int limit, int[] trucks) {
-        int answer = 0;
-        /*
-            최대 올라갈 수 있는 대수, 최대무게
-            다리에 완전히? 오르지 않은 트럭 무게는 무시
-            다리를 정해진 순서로 건너는거라서 보트무게 문제랑 다름
-            그라디는 아닌건지 체크해보기
-            다리 건너는대 1초 소요?
-            대기 -> 다리 위 가는데 1초
-            다리 위 -> 다리 밖 1초
-            다리 위에 한대씩 올라감. 한 번에 올라가는것도 아님
-            
-            다리 위 올라갈떄 체크해야할것
-            다리 사이즈, 다리 총무게
-            큐 자료구조 이용?
-            큐에 조건에 따라 추가하고 초마다 poll은 고정.
-            넣을떄만 조건체크. 
-            큐에 들어갈때 무게 항상 갱신을 위한 필드
-            
-            비어있지않으면 poll고정
-            허용되면 offer
-            
-            근데 비어있지않으면 poll먼저해야할듯
-            
-            
-            반복문으로 구현가능한가?
-            조건 만족안하면 다음반복문으로 가면 이번 트럭스킵인데? 이게 반복문으로 되는건가
-            
-            그냥 큐 두개로하는게?
-            간과한게 있음 length는 단순히 다리에 들어올 수 있는 차 개수가 아니고
-            길이 개념도 있음...
-        */
-        
-        
-        Deque<Integer> bridge = new ArrayDeque<>();
-        Deque<Integer> wait = new ArrayDeque<>();
-        // 초기값 설정
-        for (int i = 0; i < length; i++) {
-            bridge.offer(0);
+    // 트럭의 상태를 캡슐화한 도메인 객체
+    class Truck {
+        int weight;
+        int exitTime;
+
+        Truck(int weight, int exitTime) {
+            this.weight = weight;
+            this.exitTime = exitTime;
         }
-        for (int truck : trucks) {
-            wait.offer(truck);
-        }
-        int curW = 0;
+    }
+
+    public int solution(int bridge_length, int weight, int[] truck_weights) {
+        Queue<Truck> bridge = new LinkedList<>();
+        int pointer = 0;
+        int curWeight = 0;
         int time = 0;
-        while (!(bridge.isEmpty() && wait.isEmpty())) {
-            if (!bridge.isEmpty()) { 
-                int outTruck = bridge.poll(); // 다리 통과 (처음엔 0)
-                curW -= outTruck; // 다리 무게 갱신
+
+        // 대기열에 트럭이 있거나, 다리 위에 트럭이 남아있을 때까지 시계는 돈다
+        while (pointer < truck_weights.length || !bridge.isEmpty()) {
+            time++; // 1. 무조건 1초를 흐르게 함 (틱 진행)
+
+            // 2. 출차 이벤트 검사 (상태: 다리 위 -> 지남)
+            if (!bridge.isEmpty() && bridge.peek().exitTime == time) {
+                Truck finishedTruck = bridge.poll();
+                curWeight -= finishedTruck.weight;
             }
-            if (!wait.isEmpty()) { 
-                if (bridge.size() < length && limit >= curW + wait.peek()) {
-                    int inTruck = wait.poll(); // 대기 출차
-                    bridge.offer(inTruck); // 다리 입차
-                    curW += inTruck; // 다리 무게 갱신
+
+            // 3. 입차 이벤트 검사 (상태: 대기 -> 다리 위)
+            if (pointer < truck_weights.length) {
+                int nextTruckWeight = truck_weights[pointer];
+
+                // 입차 조건: 다리 하중 제한 통과 & 다리 길이(수용량) 통과
+                if (curWeight + nextTruckWeight <= weight && bridge.size() < bridge_length) {
+                    // 입차 액션: 현재 시간에 다리 길이를 더해 출차 예정 시간을 확정함
+                    bridge.offer(new Truck(nextTruckWeight, time + bridge_length));
+                    curWeight += nextTruckWeight;
+                    pointer++;
                 } else {
-                    bridge.offer(0);
+                    // 타임 점프 액션: 대기 트럭이 있지만 꽉 막혀서 못 들어갈 때
+                    // 다음 트럭이 빠져나갈 시간으로 단숨에 점프 (다음 루프의 time++를 고려해 -1)
+                    if (!bridge.isEmpty()) {
+                        time = bridge.peek().exitTime - 1;
+                    }
+                }
+            } else {
+                // 타임 점프 액션 (최적화): 대기열은 텅 비었고 다리 위에만 트럭이 남았을 때
+                // 1초씩 기다릴 필요 없이 가장 앞 트럭이 나갈 시간으로 계속 점프
+                if (!bridge.isEmpty()) {
+                    time = bridge.peek().exitTime - 1;
                 }
             }
-            time++;
         }
-        
+
+        // 큐가 완전히 비고, 모든 트럭이 다리를 빠져나왔을 때의 누적 시간이 곧 정답
         return time;
     }
-    
-  
 }
