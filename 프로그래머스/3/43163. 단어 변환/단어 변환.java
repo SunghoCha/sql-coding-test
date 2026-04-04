@@ -1,71 +1,107 @@
-import java.util.LinkedList;
-import java.util.Queue;
-
+import java.util.*;
 class Solution {
+    
+    public List<Node> nodes = new ArrayList<>();
     public int solution(String begin, String target, String[] words) {
-        // 1. target이 words 배열에 존재하는지 먼저 확인합니다. 없으면 0 반환.
-        boolean hasTarget = false;
-        for (String word : words) {
-            if (word.equals(target)) {
-                hasTarget = true;
-                break;
-            }
-        }
-        if (!hasTarget) {
-            return 0;
-        }
-
-        // 2. BFS 탐색을 위한 큐와 방문 여부 배열 초기화
-        Queue<WordNode> queue = new LinkedList<>();
-        boolean[] visited = new boolean[words.length];
+        /*
+            한번에 한 개의 단어만 바꿀수있음
+            words에 있는 단어로만 변환할 수 있음
+            이건 기존 단어들에서 한글자만 다른것들이 인접해있다는것이므로
+            우선 words를 돌면서 한글자 다른것들을 완탐으로 찾아서 인접리스트 만든후에
+            bfs돌면 될 듯
+            
+            노드가 단순 번호라면 인덱스 자체로 노드를 식별하여 사용할수있지만
+            이 경우는 스트링이라 Node 객체만들어서 사용
+            Node가 내부에 자신의 인접노드 리스트를 가지고 있는 형태
+        */
+        // word마다 adj 세팅
         
-        queue.offer(new WordNode(begin, 0));
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            Node curNode = new Node(i, word, 0);
+            nodes.add(curNode); // 노드리스트에 추가
+        }
+        for (Node node : nodes) { // 시간복잡도 n^2이긴한데 50 * 50.
+            setAdjNode(node);
+        }
+        Node beginNode = new Node(words.length, begin, 0);
+        setAdjNode(beginNode);
 
-        // 3. BFS 탐색 시작
+        return bfs(beginNode, target);
+        
+
+    }
+    
+    public int bfs(Node beginNode, String target) {
+        boolean[] visited = new boolean[nodes.size() + 1]; 
+        Deque<Node> queue = new ArrayDeque<>();
+        int count = 0;
+
+        System.out.println(beginNode.name);
+        queue.offer(beginNode);
+        visited[beginNode.num] = true;        
+        
         while (!queue.isEmpty()) {
-            WordNode current = queue.poll();
-
-            // 목표 단어에 도달하면 현재까지의 걸음(steps) 수 반환
-            if (current.word.equals(target)) {
-                return current.steps;
-            }
-
-            // words 배열을 순회하며 변환 가능한 단어를 큐에 넣음
-            for (int i = 0; i < words.length; i++) {
-                if (!visited[i] && canTransform(current.word, words[i])) {
-                    visited[i] = true; // 방문 처리
-                    queue.offer(new WordNode(words[i], current.steps + 1));
+            Node cur = queue.poll();
+            
+            for (Node next : cur.adj) {
+                if (!visited[next.num]) {
+                    next.dist = cur.dist + 1;
+                    if (next.name.equals(target)) {
+                        return next.dist;
+                    }
+                    visited[next.num] = true;
+                    queue.offer(next);
                 }
             }
         }
-
-        // 변환할 수 없는 경우 0 반환
         return 0;
     }
-
-    // 두 단어가 딱 한 개의 알파벳만 다른지 확인하는 헬퍼 메서드
-    private boolean canTransform(String word1, String word2) {
-        int diffCount = 0;
-        for (int i = 0; i < word1.length(); i++) {
-            if (word1.charAt(i) != word2.charAt(i)) {
-                diffCount++;
+    
+    /*
+        다른 글자가 1개여야함
+        Set<Character>으로 하고 set.size구하고 contain 돌았을떄 size - 1개여야함
+        이렇게하면 순서다른 글자를 체크못함. 그냥 반복문돌면서 같은지 체크하다가
+        다른게 2개 카운팅되면 탈락
+    */
+    public void setAdjNode(Node targetNode) {
+        // 자기 자신을 set에 세팅
+        String target = targetNode.name;
+        
+        for (Node node : nodes) {
+            if (node.name.equals(target)) { // 자기자신 스킵
+                continue;
             }
-            // 다른 글자가 2개 이상이면 더 볼 필요 없이 false 반환
-            if (diffCount > 1) {
-                return false;
+            if (isAdj(target, node.name)) {
+                targetNode.adj.add(node);
             }
         }
-        return diffCount == 1;
     }
-
-    // 큐에 담을 단어와 현재까지의 변환 횟수를 묶어주는 내부 클래스
-    private static class WordNode {
-        String word;
-        int steps;
-
-        WordNode(String word, int steps) {
-            this.word = word;
-            this.steps = steps;
+    
+    public boolean isAdj(String target, String node) {
+        int length = target.length();
+        int missMatchCount = 0;
+        for (int i = 0; i < length; i++) {
+            if (target.charAt(i) !=  node.charAt(i)) {
+                missMatchCount++;
+                if (missMatchCount > 1) {
+                    return false;
+                }
+            }
         }
+        return missMatchCount == 1;
+    }
+    
+    public static class Node {
+        public int num;
+        public String name;
+        public int dist;
+        public List<Node> adj = new ArrayList<>();
+        
+        Node (int num, String name, int dist) {
+            this.num = num;
+            this.name = name;
+            this.dist = dist;
+        } 
     }
 }
