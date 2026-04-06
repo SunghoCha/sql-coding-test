@@ -1,69 +1,64 @@
 import java.util.*;
-
-/**
- * 여행경로
- * 전략: DFS + used 배열 + 도착지 알파벳순 정렬
- * 시간복잡도: O(N! × N) 최악, 실제론 정렬+조기종료로 훨씬 빠름
- */
 class Solution {
-
-    private String[][] tickets;
-    private boolean[] used;
-    private List<String> route;
-
+    public static String TARGET = "ICN";
+    public String[][] tickets;
+    public List<String> list = new ArrayList<>();
     public String[] solution(String[][] tickets) {
+        /*
+            tickets 기반으로 그래프 구성한다음에 알파벳빠른순으로 탐색하면될듯?
+            그래프를 어떻게 구성할 것인지? String 자체를 노드로?
+            List<List<String>> 으로하면 될듯?
+            시작점은 tickets[0][0].
+        */
+        /* 
+            바로 초기화는 어려울듯? 10000개 이하니까 10000개할수도있지만 ..
+            근데 이렇게하면 애매한게 인덱스가 노드가 아니고 String이 노드가됨..
+            Map<String, List<String>> 으로 해야하지않나?
+        */
+        //List<List<String>> adj = new ArrayList<>();
+
         this.tickets = tickets;
-        this.used = new boolean[tickets.length];
-        this.route = new ArrayList<>();
-
-        // 도착지 기준 알파벳순 정렬 → 처음 완성된 경로 = 최솟값 경로
         Arrays.sort(tickets, (a, b) -> a[1].compareTo(b[1]));
-
-        // ICN에서 출발
-        route.add("ICN");
-
-        // SEARCHING: DFS 시작
-        dfs("ICN", 0);
-
-        return route.toArray(new String[0]);
+        boolean[] used = new boolean[tickets.length];
+        if (dfs(0, TARGET, used)) {
+            String[] answer = new String[list.size()];
+            for (int i = 0; i < list.size(); i++) {
+                answer[i] = list.get(i);
+            }
+            return answer;
+        }
+        return new String[0];
     }
-
-    /**
-     * DFS 탐색
-     * @param current 현재 공항
-     * @param usedCount 지금까지 사용한 티켓 수
-     * @return 모든 티켓을 소진한 경로를 찾으면 true
-     */
-    private boolean dfs(String current, int usedCount) {
-        // COMPLETE: 모든 티켓을 사용했으면 경로 완성
-        if (usedCount == tickets.length) {
+    // 한 번 방문하면 못했었나? 방문가능.. 방문하면서 전부 담음. 알파벳순
+    // 그러면 지금처럼 adj 구성해도 되는게맞나?
+    // 방문배열없이 그냥 하면 되려나..
+    // 근데 이 문제 bfs로가능? dfs해야하지않나?
+    /*
+       방문을 해당 노드에 대한 체크로만 고정해서 생각해서 이런듯? 
+       방문은 정의에 따라 노드자체는 방문 여러번해도되고 같은 간선 이용횟수에 대한 정의도 가능
+       
+       근데 보통 자료구조가 여러개로 흩어져있어도 인덱스를 식별자로해서 매핑하면 해결되는 경우가많음
+       인접리스트로 구성한경우 왜 티켓정보에 대한 매핑이 불가능해지는가?
+       티켓번호에 대한 정보가 유실됨
+    */
+    public boolean dfs(int depth, String target, boolean[] used) {
+        if (depth == tickets.length) {
+            System.out.println(depth);
+            list.add(target); // 마지막
             return true;
-        }
-
-        // SEARCHING: 현재 공항에서 출발 가능한 미사용 티켓 탐색
+        }   
+        
         for (int i = 0; i < tickets.length; i++) {
-            // 이미 사용한 티켓이거나 출발지가 다르면 건너뜀
-            if (used[i] || !tickets[i][0].equals(current)) {
-                continue;
+            if (!used[i] && tickets[i][0].equals(target)) {
+                used[i] = true;
+                list.add(target);
+                if (dfs(depth + 1, tickets[i][1], used)) {
+                    return true;
+                }
+                list.remove(list.size() - 1);
+                used[i] = false;
             }
-
-            // USING: 티켓 사용 → 다음 공항으로 이동
-            used[i] = true;
-            route.add(tickets[i][1]);
-
-            // 재귀 탐색
-            if (dfs(tickets[i][1], usedCount + 1)) {
-                // COMPLETE 체인 전파: 정답을 찾았으면 즉시 종료
-                // (이 return이 없으면 백트래킹이 정답 경로를 지워버림)
-                return true;
-            }
-
-            // BACKTRACK: 이 경로로는 모든 티켓 소진 불가 → 되돌리기
-            used[i] = false;
-            route.remove(route.size() - 1);
         }
-
-        // SEARCHING: 모든 티켓을 시도했지만 경로 없음
         return false;
     }
 }
